@@ -61,6 +61,8 @@ def main():
         occupation TEXT
         );\n\n""")
 
+        f.write("BEGIN TRANSACTION;\n\n")
+
         movies_path = os.path.join(dataset_dir, 'movies.csv')
         if os.path.exists(movies_path):
             with open(movies_path, 'r', encoding = 'utf-8') as mf:
@@ -108,6 +110,8 @@ def main():
                     if len(row) >= 4:
                         f.write(f"INSERT INTO tags (id, user_id, movie_id, tag, timestamp) VALUES ({tid}, {row[0]}, {row[1]}, {escape_sql(row[2])}, {row[3]});\n")
                         tid += 1
+
+        f.write("COMMIT;\n")
 
 if __name__ == '__main__':
     main()
