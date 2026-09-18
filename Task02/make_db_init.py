@@ -18,10 +18,16 @@ def main():
     sql_file = os.path.join(base_dir, 'db_init.sql')
 
     with open(sql_file, 'w', encoding = 'utf-8') as f:
+        f.write("PRAGMA foreign_keys = OFF;\n")
+        f.write("PRAGMA synchronous = OFF;\n")
+        f.write("PRAGMA journal_mode = MEMORY;\n")
+        f.write("PRAGMA temp_store = MEMORY;\n")
+        f.write("PRAGMA cache_size = 100000;\n\n")
+
         f.write("DROP TABLE IF EXISTS movies;\n")
         f.write("DROP TABLE IF EXISTS users;\n")
         f.write("DROP TABLE IF EXISTS ratings;\n")
-        f.write("DROP TABLE IF EXISTS tags;\n")
+        f.write("DROP TABLE IF EXISTS tags;\n\n")
 
         f.write("""CREATE TABLE movies (
         id INTEGER PRIMARY KEY,
@@ -89,7 +95,7 @@ def main():
                 rid = 1
                 for row in reader:
                     if len(row) >= 4:
-                        f.write(f"INSERT INTO ratings (id, user_id, movie_id, rating, timestamp) VALUES ({rid}, {row[0]}, {row[1]}, {row[2]});\n")
+                        f.write(f"INSERT INTO ratings (id, user_id, movie_id, rating, timestamp) VALUES ({rid}, {row[0]}, {row[1]}, {row[2]}, {row[3]});\n")
                         rid += 1
 
         tags_path = os.path.join(dataset_dir, 'tags.csv')
@@ -100,7 +106,7 @@ def main():
                 tid = 1
                 for row in reader:
                     if len(row) >= 4:
-                        f.write(f"INSERT INTO tags (id, usere_id, movie_id, tag, timestamp) VALUES ({tid}, {row[0]}, {row[1]}, {escape_sql(row[2])}, {row[3]});\n")
+                        f.write(f"INSERT INTO tags (id, user_id, movie_id, tag, timestamp) VALUES ({tid}, {row[0]}, {row[1]}, {escape_sql(row[2])}, {row[3]});\n")
                         tid += 1
 
 if __name__ == '__main__':
