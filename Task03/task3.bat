@@ -1,4 +1,3 @@
-```
 #!/bin/bash
 chcp 65001
 
@@ -87,28 +86,27 @@ echo "7. Провести анализ востребованности ресу
 регистрировавшихся на сайте в каждом году. 
 Найти, в каких годах регистрировалось больше всего и меньше всего пользователей."
 echo -----------------------------------------------------------
-echo "Количество пользователей, регистрировавшихся на сайте в каждом году:"
+echo "- Количество пользователей, регистрировавшихся на сайте в каждом году:"
 sqlite3 movies_rating.db -box -echo "
 SELECT strftime('%Y', register_date), COUNT(*)
 FROM users
 GROUP BY strftime('%Y', register_date)
 ORDER BY strftime('%Y', register_date);
 "
-echo "Год с наибольшим количеством регистраций:"
+echo "- Год с наибольшим количеством регистраций:"
 sqlite3 movies_rating.db -box -echo "
 SELECT strftime('%Y', register_date)
 FROM users
 GROUP BY strftime('%Y', register_date)
 ORDER BY COUNT(*) DESC
-LIMIT 1
+LIMIT 1;
 "
-echo "Год с наименьшим количеством регистраций:"
+echo "- Год с наименьшим количеством регистраций:"
 sqlite3 movies_rating.db -box -echo "
 SELECT strftime('%Y', register_date)
 FROM users
 GROUP BY strftime('%Y', register_date)
 ORDER BY COUNT(*) ASC
-LIMIT 1
+LIMIT 1;
 "
 echo " "
-```
