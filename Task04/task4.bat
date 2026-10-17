@@ -49,7 +49,24 @@ echo "3. Вывести в одном списке все фильмы с мак
 В зависимости от рейтинга в колонке \"Рекомендуем\" для фильмов должно быть написано \"Да\" или \"Нет\"."
 echo --------------------------------------------------
 sqlite3 movies_rating.db -box -echo "
-
+WITH avg_ratings AS (
+  SELECT movie_id, AVG(rating) AS avg_rating
+  FROM ratings
+  GROUP BY movie_id
+),
+extrems AS (
+  SELECT MIN(avg_rating) AS min_rating, 
+    MAX(avg_rating) AS max_rating
+  FROM avg_ratings
+)
+SELECT movies.title, movies.year, avg_ratings.avg_rating,
+CASE WHEN avg_ratings.avg_rating = extrems.max_rating THEN 'Да' ELSE 'Нет' END AS "Рекомендуем"
+FROM avg_ratings
+JOIN extrems ON avg_ratings.avg_rating = extrems.min_rating
+  OR avg_ratings.avg_rating = extrems.max_rating
+JOIN movies ON movies.id = avg_ratings.movie_id
+ORDER BY movies.year ASC, 
+  movies.title ASC;
 "
 echo " "
 
@@ -57,7 +74,11 @@ echo "4. Вычислить количество оценок и среднюю 
 которую дали фильмам пользователи-мужчины в период с 2011 по 2014 год."
 echo --------------------------------------------------
 sqlite3 movies_rating.db -box -echo "
-
+SELECT COUNT(ratings.rating), AVG(ratings.rating)
+FROM ratings
+JOIN users ON users.id = ratings.user_id
+WHERE users.gender = 'male' 
+  AND strftime('%Y:', ratings.timestamp, 'unixepoch') BETWEEN '2011' AND '2014';
 "
 echo " "
 
