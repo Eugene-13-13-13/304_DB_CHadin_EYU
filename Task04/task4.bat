@@ -150,7 +150,7 @@ WITH RECURSIVE years AS (
     UNION ALL
     SELECT years.year + 1
     FROM years
-    WHERE years.year < CAST(strftime('%Y:', 'now') AS INTEGER)
+    WHERE years.year < CAST(strftime('%Y', 'now') AS INTEGER)
 )
 SELECT years.year,
        CASE CAST(strftime('%w', printf('%04d-08-01', years.year)) AS INTEGER)
