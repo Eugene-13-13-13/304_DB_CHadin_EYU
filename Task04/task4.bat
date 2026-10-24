@@ -9,8 +9,8 @@ echo "1. Найти все пары пользователей, оценивши
 В списке оставить первые 100 записей."
 echo --------------------------------------------------
 sqlite3 movies_rating.db -box -echo "
-SELECT u1.name AS user1, 
-       u2.name AS user2, 
+SELECT DISTINCT u1.name AS user1,
+       u2.name AS user2,
        m.title AS movie
 FROM ratings AS r1
 JOIN ratings AS r2 ON r1.movie_id = r2.movie_id AND r1.user_id < r2.user_id
@@ -26,21 +26,26 @@ echo "2. Найти 10 самых старых оценок от разных п
 echo --------------------------------------------------
 sqlite3 movies_rating.db -box -echo "
 WITH first_ratings AS (
-	SELECT user_id, 
-	       MIN(timestamp) AS first_timestamp 
+	SELECT user_id,
+	       movie_id,
+	       rating,
+	       timestamp,
+	       ROW_NUMBER() OVER (
+	           PARTITION BY user_id
+	           ORDER BY timestamp ASC, id ASC
+               ) AS rn
 	FROM ratings
-	GROUP BY user_id
 )
 SELECT movies.title,
        users.name,
-       ratings.rating,
-       date(ratings.timestamp, 'unixepoch')
+       first_ratings.rating,
+       date(first_ratings.timestamp, 'unixepoch')
 FROM first_ratings
-JOIN ratings ON first_ratings.user_id = ratings.user_id AND first_ratings.first_timestamp = ratings.timestamp
-JOIN movies ON movies.id = ratings.movie_id
-JOIN users ON users.id = ratings.user_id
-ORDER BY ratings.timestamp ASC
-LIMIT 10; 
+JOIN movies ON movies.id = first_ratings.movie_id
+JOIN users ON users.id = first_ratings.user_id
+WHERE first_ratings.rn = 1
+ORDER BY first_ratings.timestamp ASC
+LIMIT 10 
 "
 echo " "
 
@@ -64,7 +69,7 @@ SELECT movies.title, movies.year, avg_ratings.avg_rating,
 CASE
     WHEN avg_ratings.avg_rating = extrems.max_rating THEN 'Да'
     ELSE 'Нет'
-    END AS "Рекомендуем"
+    END AS 'Рекомендуем'
 FROM avg_ratings
 JOIN extrems ON avg_ratings.avg_rating = extrems.min_rating OR avg_ratings.avg_rating = extrems.max_rating
 JOIN movies ON movies.id = avg_ratings.movie_id
