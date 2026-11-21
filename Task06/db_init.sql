@@ -1,6 +1,5 @@
 PRAGMA foreign_keys = ON;
 
--- Удаляем строго от дочерних таблиц к родительским
 DROP TABLE IF EXISTS completed_procedures;
 DROP TABLE IF EXISTS appointments;
 DROP TABLE IF EXISTS services;
